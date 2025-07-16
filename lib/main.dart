@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_list/LoginPage.dart';
+import 'package:todo_list/SignupPage.dart';
 
 void main() {
   runApp(const MyApp());

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:todo_list/SignupPage.dart';
+import 'package:get/get.dart';
 
 class LoginPage extends StatefulWidget {
+  static route () =>  MaterialPageRoute(
+    builder: (context) => const LoginPage(),
+  );
   const LoginPage({super.key});
 
   @override
@@ -148,7 +153,9 @@ class _LoginPageState extends State<LoginPage> {
             left: 15,
             right: 15,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Get.off(() => Signuppage());
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,
                 elevation: 0,
