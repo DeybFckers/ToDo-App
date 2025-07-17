@@ -123,6 +123,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Tuesday',
                       style: TextStyle(
                         fontSize: 20,
@@ -145,6 +146,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Wednesday',
                       style: TextStyle(
                         fontSize: 20,
@@ -167,6 +169,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Thursday',
                       style: TextStyle(
                         fontSize: 20,
@@ -189,6 +192,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Friday',
                       style: TextStyle(
                         fontSize: 20,
@@ -211,6 +215,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Saturday',
                       style: TextStyle(
                         fontSize: 20,
@@ -233,6 +238,7 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    SizedBox(height: 10),
                     Text('Sunday',
                       style: TextStyle(
                         fontSize: 20,
