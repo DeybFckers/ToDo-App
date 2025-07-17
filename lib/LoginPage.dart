@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/SignupPage.dart';
 import 'package:get/get.dart';
+import 'package:todo_list/HomePage.dart';
 
 class LoginPage extends StatefulWidget {
   static route () =>  MaterialPageRoute(
@@ -32,7 +33,7 @@ class _LoginPageState extends State<LoginPage> {
   void _login(){
     if(emailController.text == testEmail &&
       passwordController.text == testPassword){
-      print('Login successful!');
+      Get.off(() => HomePage());
     }else{
       print('Incorrect Credentials!');
     }
@@ -60,15 +61,15 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(height: 20.0),
                   Form(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
+                      padding:  EdgeInsets.symmetric(horizontal: 15),
                       child: Column(
                         children: [
                           TextFormField(
                             controller: emailController,
                             decoration: InputDecoration(
                               //Text-form Size
-                              contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                              prefixIcon: const Icon(Icons.email),
+                              contentPadding:  EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                              prefixIcon: Icon(Icons.email),
                               labelText: 'Email',
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.0),
@@ -80,16 +81,16 @@ class _LoginPageState extends State<LoginPage> {
                               }
                             },
                           ),
-                          const SizedBox(height: 20),
+                           SizedBox(height: 20),
                           TextFormField(
                             controller: passwordController,
                             obscureText: _secureText,
                             decoration: InputDecoration(
                               //text-form size
-                              contentPadding: const EdgeInsets.symmetric(
+                              contentPadding:  EdgeInsets.symmetric(
                                   vertical: 20, horizontal: 16),
                               labelText: 'Password',
-                              prefixIcon: const Icon(Icons.key),
+                              prefixIcon:  Icon(Icons.key),
                               suffixIcon: passwordController.text.isNotEmpty
                                   ? IconButton(
                                 icon: Icon(_secureText
@@ -116,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
                               setState(() {});
                             },
                           ),
-                          const SizedBox(height: 20.0),
+                          SizedBox(height: 20.0),
                           ElevatedButton(
                             onPressed: () {
                               _login();
@@ -125,13 +126,13 @@ class _LoginPageState extends State<LoginPage> {
                               backgroundColor: Colors.green[500],
                               fixedSize: Size(415, 55),
                             ),
-                            child: const Text('Login',
+                            child:  Text('Login',
                                 style: TextStyle(color: Colors.white)),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20),
                           GestureDetector(
                             onTap: () {},
-                            child: const Text(
+                            child: Text(
                               'Forgot Password?',
                               style: TextStyle(
                                 color: Colors.black,
@@ -160,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 fixedSize: const Size(415, 55),
-                side: const BorderSide(color: Colors.green, width: 2),
+                side: BorderSide(color: Colors.green, width: 2),
               ),
               child: Text(
                 'Create new account',
