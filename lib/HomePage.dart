@@ -33,14 +33,17 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.green,
         automaticallyImplyLeading: false,
         actions: [
-          IconButton(
-              onPressed: (){
-                
-              },
-              icon: Icon(Icons.menu)
-          )
+         Builder(
+           builder: (context) =>  IconButton(
+                icon: Icon(Icons.menu),
+               onPressed: (){
+                 Scaffold.of(context).openEndDrawer();
+               },
+           )
+         )
         ],
       ),
+      endDrawer: NavigationDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -289,3 +292,11 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+class NavigationDrawer extends StatelessWidget {
+  const NavigationDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context) => Drawer();
+}
+
