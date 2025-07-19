@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:todo_list/AddTask.dart';
+import 'package:todo_list/LoginPage.dart';
+import 'package:todo_list/SettingsPage.dart';
+import 'package:todo_list/TermsAndCondition.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -43,7 +46,7 @@ class _HomePageState extends State<HomePage> {
          )
         ],
       ),
-      endDrawer: NavigationDrawer(),
+      endDrawer: CustomavigationDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -293,10 +296,110 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({super.key});
+class CustomavigationDrawer extends StatelessWidget {
+  const CustomavigationDrawer({super.key});
+
+  void _handleLogout(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+            title: Text('Log Out'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => LoginPage()
+                    ),
+                  );
+                },
+                child: Text('Log Out'),
+              )
+            ]
+        )
+    );
+  }
 
   @override
-  Widget build(BuildContext context) => Drawer();
+  Widget build(BuildContext context) => Drawer(
+    child: SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget> [
+          buildHeader(context),
+          buildMenuItem(context),
+          ],
+      ),
+    ),
+  );
+
+  Widget buildHeader(BuildContext context) => Container(
+    color: Colors.green.shade700,
+    padding: EdgeInsets.only(
+      top: MediaQuery.of(context).padding.top,
+    ),
+    child: Column(
+      children: [
+        CircleAvatar(
+          radius:52,
+          backgroundImage: NetworkImage(
+              'https://images.unsplash.com/photo-1582266255765-fa5cf1a1d501?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+          ),
+        ),
+        SizedBox(height: 12),
+        Text(
+          'Dave',
+          style: TextStyle(fontSize: 28, color: Colors.black),
+        )
+      ],
+    ),
+  );
+
+  Widget buildMenuItem(BuildContext context) => Column(
+    children: [
+      ListTile(
+        leading: Icon(Icons.home_outlined),
+        title: Text('Home'),
+        onTap: () =>
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => HomePage(),
+            )
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.settings),
+        title: Text('Settings'),
+        onTap: () =>
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => SettingsPage(),
+          )
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.policy),
+        title: Text('Terms & condition'),
+        onTap: () =>
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => Termsandcondition(),
+          )
+        ),
+      ),
+      ListTile(
+        leading: Icon(Icons.logout),
+        title: const Text(
+          'Log Out',
+          style:
+          TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+        ),
+        onTap: () => _handleLogout(context),
+      ),
+    ],
+  );
 }
 
