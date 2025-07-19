@@ -62,10 +62,11 @@ class _SignuppageState extends State<Signuppage> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
-                        validator: (value) {
+                        validator: (value){
                           if (value == null || value.isEmpty) {
                             return "Please enter your Name";
                           }
+                          return null;
                         },
                       ),
                       SizedBox(height:20),
