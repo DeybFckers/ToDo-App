@@ -46,6 +46,7 @@ class _SignuppageState extends State<Signuppage> {
               ),
               SizedBox(height: 20,),
               Form(
+                key: formKey,
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(
@@ -79,10 +80,16 @@ class _SignuppageState extends State<Signuppage> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
+                        // EMAIL VALIDATOR
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return "Please enter your Email";
                           }
+                          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+                          if(!emailRegex.hasMatch(value)){
+                            return "Enter a valid email address";
+                          }
+                          return null;
                         },
                       ),
                       SizedBox(height: 20,),
@@ -124,10 +131,9 @@ class _SignuppageState extends State<Signuppage> {
                       SizedBox(height:20),
                       ElevatedButton(
                         onPressed: () {
-                          print("Your Name:" + nameController.text,);
-                          print("Your Email:" + emailController.text,);
-                          print("Your Password:" + passwordController.text,);
-                          Get.off(() => LoginPage());
+                          if(formKey.currentState!.validate()){
+                            Get.off(() => LoginPage());
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[500],
