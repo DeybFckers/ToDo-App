@@ -21,7 +21,7 @@ class SettingsPage extends StatelessWidget {
           )
         ],
       ),
-      endDrawer: CustomavigationDrawer(), // 🔍 Add this
+      endDrawer: CustomnavigationDrawer(), // 🔍 Add this
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(75),

@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
          )
         ],
       ),
-      endDrawer: CustomavigationDrawer(),
+      endDrawer: CustomnavigationDrawer(),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -296,8 +296,8 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class CustomavigationDrawer extends StatelessWidget {
-  const CustomavigationDrawer({super.key});
+class CustomnavigationDrawer extends StatelessWidget {
+  const CustomnavigationDrawer({super.key});
 
   void _handleLogout(BuildContext context) {
     showDialog(
