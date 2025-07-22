@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:todo_list/HomePage.dart';
 
 class Termsandcondition extends StatelessWidget {
-  const Termsandcondition({super.key});
+  final String uid;
+  final String name;
+  final String email;
+  const Termsandcondition({super.key, required this.uid, required this.name, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,11 @@ class Termsandcondition extends StatelessWidget {
           )
         ],
       ),
-      endDrawer: CustomnavigationDrawer(), // 🔍 Add this
+      endDrawer: CustomnavigationDrawer(
+          uid: uid,
+          name: name,
+          email: email
+      ), // 🔍 Add this
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(75),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:todo_list/SignupPage.dart';
 import 'package:get/get.dart';
 import 'package:todo_list/HomePage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginPage extends StatefulWidget {
   static route () =>  MaterialPageRoute(
@@ -14,14 +16,14 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   bool _secureText = true;
+  bool circular = false;
 
-  //test account
-  final String testEmail = "dave@gmail.com";
-  final String testPassword = '123';
 
   @override
   void dispose() {
@@ -30,14 +32,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _login(){
-    if(emailController.text == testEmail &&
-      passwordController.text == testPassword){
-      Get.off(() => HomePage());
-    }else{
-      print('Incorrect Credentials!');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   const SizedBox(height: 20.0),
                   Form(
+                    key: formKey,
                     child: Padding(
                       padding:  EdgeInsets.symmetric(horizontal: 15),
                       child: Column(
@@ -119,14 +114,48 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           SizedBox(height: 20.0),
                           ElevatedButton(
-                            onPressed: () {
-                              _login();
+                            onPressed: () async  {
+                              setState(() {
+                                circular = true;
+                              });
+                              if(formKey.currentState!.validate()){
+                                try{
+                                  UserCredential userCredential = await firebaseAuth.signInWithEmailAndPassword(
+                                      email: emailController.text ,
+                                      password: passwordController.text);
+
+                                  User? user = userCredential.user;
+
+                                  final userDoc = await firebaseStore
+                                  .collection('users')
+                                  .doc(user!.uid)
+                                  .get();
+
+                                  String name = userDoc.data()?['Name']??'';
+                                  String email = userDoc.data()?['Email']??'';
+
+                                  Get.offAll(() => HomePage(
+                                    uid:user.uid,
+                                    name: name,
+                                    email: email,
+                                  ));
+                                  circular = false;
+
+                                } catch (e) {
+                                  final snackBar = SnackBar(content: Text(e.toString()));
+                                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                                  setState(() {
+                                    circular = false;
+                                  });
+                                }
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green[500],
                               fixedSize: Size(415, 55),
                             ),
-                            child:  Text('Login',
+                            child:  circular ? CircularProgressIndicator() :
+                                Text('Login',
                                 style: TextStyle(color: Colors.white)),
                           ),
                           SizedBox(height: 20),
@@ -155,7 +184,7 @@ class _LoginPageState extends State<LoginPage> {
             right: 15,
             child: ElevatedButton(
               onPressed: () {
-                Get.off(() => Signuppage());
+                Get.to(() => Signuppage());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.transparent,

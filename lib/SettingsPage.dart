@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:todo_list/HomePage.dart'; // Optional: for "Home" menu item
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final String uid;
+  final String name;
+  final String email;
+  const SettingsPage({super.key, required this.uid, required this.name, required this.email});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,10 @@ class SettingsPage extends StatelessWidget {
           )
         ],
       ),
-      endDrawer: CustomnavigationDrawer(), // 🔍 Add this
+      endDrawer: CustomnavigationDrawer(
+          uid: uid,
+          name: name,
+          email: email),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(75),

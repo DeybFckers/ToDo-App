@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:todo_list/LoginPage.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class Signuppage extends StatefulWidget {
   static route () =>  MaterialPageRoute(
@@ -13,6 +16,8 @@ class Signuppage extends StatefulWidget {
 }
 
 class _SignuppageState extends State<Signuppage> {
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
   final emailController = TextEditingController();
@@ -20,6 +25,7 @@ class _SignuppageState extends State<Signuppage> {
   bool _secureText = true;
   PasswordStrength? _passwordStrength;
   bool _showPasswordInstructions = false;
+  bool circular = false;
 
   void dispose (){
     nameController.dispose();
@@ -137,6 +143,18 @@ class _SignuppageState extends State<Signuppage> {
                           if (value == null || value.isEmpty) {
                             return "Please enter your Password";
                           }
+                          if (value.length < 8) {
+                            return "Password must be at least 8 characters long";
+                          }
+                          if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                            return "Password must contain at least one uppercase letter";
+                          }
+                          if (!RegExp(r'[0-9]').hasMatch(value)) {
+                            return "Password must contain at least one number";
+                          }
+                          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(value)) {
+                            return "Password must include a special character";
+                          }
                           return null;
                         },
                         onChanged: (value) {
@@ -170,16 +188,46 @@ class _SignuppageState extends State<Signuppage> {
                       ],
                       SizedBox(height:20),
                       ElevatedButton(
-                        onPressed: () {
-                          if(formKey.currentState!.validate()){
-                            Get.off(() => LoginPage());
-                          }
+                        onPressed: () async {
+                          setState(() {
+                            circular = true;
+                          });
+                           if(formKey.currentState!.validate()){
+                             try {
+                               //create user in firebase authentication
+                               UserCredential userCredential = await firebaseAuth.createUserWithEmailAndPassword(
+                                   email: emailController.text, password: passwordController.text);
+
+                               await userCredential.user?.updateDisplayName(nameController.text);
+
+                               //save to firebase database
+                               await firebaseStore
+                               .collection('users')
+                               .doc(userCredential.user!.uid)
+                               .set({
+                                 'Name': nameController.text,
+                                 'Email': emailController.text,
+                                 'created_at': DateTime.now(),
+                               });
+
+                               Get.off(() => LoginPage());
+                               circular = false;
+
+                             } catch (e) {
+                               final snackBar = SnackBar(content: Text(e.toString()));
+                               ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                               setState(() {
+                                 circular = false;
+                               });
+                             }
+                           }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green[500],
                           fixedSize: Size(415, 55),
                         ),
-                        child: const Text('Sign Up',
+                        child: circular ? CircularProgressIndicator() :
+                            Text('Sign Up',
                             style: TextStyle(color: Colors.white)),
                       ),
                       SizedBox(height:20),

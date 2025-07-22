@@ -4,9 +4,13 @@ import 'package:todo_list/AddTask.dart';
 import 'package:todo_list/LoginPage.dart';
 import 'package:todo_list/SettingsPage.dart';
 import 'package:todo_list/TermsAndCondition.dart';
+import 'package:get/get.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String uid;
+  final String name;
+  final String email;
+  const HomePage({super.key, required this.uid, required this.name, required this.email,});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -46,7 +50,12 @@ class _HomePageState extends State<HomePage> {
          )
         ],
       ),
-      endDrawer: CustomnavigationDrawer(),
+
+      endDrawer: CustomnavigationDrawer(
+        uid: widget.uid,
+        name: widget.name,
+        email: widget.email),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -61,7 +70,7 @@ class _HomePageState extends State<HomePage> {
                       TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Hi, Dave!\n',
+                            text: 'Hi, ${widget.name}!\n',
                             style: TextStyle(
                               fontSize: 25,
                               fontWeight: FontWeight.bold,
@@ -126,7 +135,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -150,7 +159,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -174,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -198,7 +207,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -222,7 +231,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -246,7 +255,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -270,7 +279,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.only(bottom: 16, left: 10),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.green, width: 2)
@@ -297,7 +306,16 @@ class _HomePageState extends State<HomePage> {
 }
 
 class CustomnavigationDrawer extends StatelessWidget {
-  const CustomnavigationDrawer({super.key});
+  final String uid;
+  final String name;
+  final String email;
+
+  const CustomnavigationDrawer({
+    super.key,
+    required this.uid,
+    required this.name,
+    required this.email,
+  });
 
   void _handleLogout(BuildContext context) {
     showDialog(
@@ -313,11 +331,8 @@ class CustomnavigationDrawer extends StatelessWidget {
               ),
               TextButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (_) => LoginPage()
-                    ),
-                  );
+                  Navigator.pop(context);
+                  Get.offAll(() => LoginPage());
                 },
                 child: Text('Log Out'),
               )
@@ -354,9 +369,15 @@ class CustomnavigationDrawer extends StatelessWidget {
         ),
         SizedBox(height: 12),
         Text(
-          'Dave',
-          style: TextStyle(fontSize: 28, color: Colors.black),
-        )
+          name,
+          style: TextStyle(fontSize: 25, color: Colors.black),
+        ),
+        SizedBox(height: 12),
+        Text(
+          email,
+          style: TextStyle(fontSize: 25, color: Colors.black),
+        ),
+        SizedBox(height: 12),
       ],
     ),
   );
@@ -366,29 +387,32 @@ class CustomnavigationDrawer extends StatelessWidget {
       ListTile(
         leading: Icon(Icons.home_outlined),
         title: Text('Home'),
-        onTap: () =>
-            Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => HomePage(),
-            )
-        ),
+        onTap: () {
+          Navigator.pop(context);
+          Get.off(() => HomePage(
+              uid: uid, name: name, email: email)
+          );
+        },
       ),
       ListTile(
         leading: Icon(Icons.settings),
         title: Text('Settings'),
-        onTap: () =>
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-              builder: (context) => SettingsPage(),
-          )
-        ),
+        onTap: () {
+          Navigator.pop(context);
+          Get.off(() => SettingsPage(
+              uid: uid, name: name, email: email)
+          );
+        },
       ),
       ListTile(
         leading: Icon(Icons.policy),
         title: Text('Terms & condition'),
-        onTap: () =>
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => Termsandcondition(),
-          )
-        ),
+        onTap: () {
+          Navigator.pop(context);
+          Get.off(() => Termsandcondition(
+              uid: uid, name: name, email: email)
+          );
+        },
       ),
       ListTile(
         leading: Icon(Icons.logout),
