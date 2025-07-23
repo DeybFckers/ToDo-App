@@ -18,6 +18,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
 
   @override
   void initState(){
@@ -25,7 +26,7 @@ class _HomePageState extends State<HomePage> {
     fetchTasks();
   }
 
-  Map<String, List<String>> tasksPerDay = {
+  Map<String, List<Map<String, dynamic>>> tasksPerDay = {
     'Monday': [],
     'Tuesday': [],
     'Wednesday': [],
@@ -35,17 +36,16 @@ class _HomePageState extends State<HomePage> {
     'Sunday': [],
   };
 
-  Future<void>fetchTasks() async {
-    FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
+  Future<void> fetchTasks() async {
 
     try {
-      //fetch data from firestore
       QuerySnapshot snapshot = await firebaseStore
           .collection('todos')
           .where('userId', isEqualTo: widget.uid)
+          .where('Done', isEqualTo: false)
           .get();
 
-      Map<String, List<String>> updatedTasks = {
+      Map<String, List<Map<String, dynamic>>> updatedTasks = {
         'Monday': [],
         'Tuesday': [],
         'Wednesday': [],
@@ -57,20 +57,96 @@ class _HomePageState extends State<HomePage> {
 
       for (var doc in snapshot.docs) {
         final data = doc.data() as Map<String, dynamic>;
-
+        data['id'] = doc.id; // save document ID
         String day = data['Day'];
-        String tasks = data['todoList'];
-
-        if(updatedTasks.containsKey(day)){
-          updatedTasks[day]!.add(tasks);
+        if (updatedTasks.containsKey(day)) {
+          updatedTasks[day]!.add(data);
         }
       }
 
       setState(() {
         tasksPerDay = updatedTasks;
       });
-    }catch (e){}
+    } catch (e) {
+      print('Error fetching tasks: $e');
+    }
   }
+
+  void _editTask(Map<String, dynamic> task) {
+    TextEditingController controller = TextEditingController(text: task['todoList']);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Edit Task'),
+        content: TextField(controller: controller),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              //Update Database
+              await firebaseStore
+                  .collection('todos')
+                  .doc(task['id'])
+                  .update({'todoList': controller.text});
+              Navigator.pop(context);
+              fetchTasks(); // refresh
+            },
+            child: Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _deleteTask(Map<String, dynamic> task) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text('Delete Task'),
+        content: Text('Are you sure you want to delete the task?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              //Delete Database
+              await firebaseStore
+                  .collection('todos')
+                  .doc(task['id'])
+                  .delete();
+              Navigator.pop(context);
+              fetchTasks(); // refresh
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //Done
+  void _toggleDone(Map<String, dynamic> task) async {
+    final dynamic id = task['id'];
+    final taskId = id is String ? id : id?.toString(); // Ensure it's a String
+    final currentStatus = task['Done'] ?? false;
+
+      await firebaseStore
+          .collection('todos')
+          .doc(taskId)
+          .update({'Done': !currentStatus});
+
+      fetchTasks();
+  }
+
+
+
 
 
   @override
@@ -174,13 +250,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Monday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _editTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -199,7 +281,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Monday']!
                           .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                           )
                         ).toList(),
                       ),
@@ -210,7 +292,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Monday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -231,13 +316,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Tuesday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Tuesday']!) {
+                                _editTask(task); // or call dialog for first task only
+                                break; // only one task to edit
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -256,7 +347,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Tuesday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -267,7 +358,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Tuesday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -289,13 +383,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Wednesday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Wednesday']!) {
+                                _editTask(task); // or call dialog for first task only
+                                break; // only one task to edit
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -314,7 +414,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Wednesday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -325,7 +425,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Wednesday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -347,13 +450,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Thursday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Thursday']!) {
+                                _editTask(task); // or call dialog for first task only
+                                break; // only one task to edit
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -372,7 +481,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Thursday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -383,7 +492,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Thursday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -404,13 +516,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Friday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Friday']!) {
+                                _editTask(task); // or call dialog for first task only
+                                break; // only one task to edit
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -429,7 +547,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Friday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -440,7 +558,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Friday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -461,13 +582,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Saturday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Saturday']!) {
+                                _editTask(task); // or call dialog for first task only
+                                break; // only one task to edit
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -486,7 +613,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Saturday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -497,7 +624,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Saturday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
@@ -519,13 +649,19 @@ class _HomePageState extends State<HomePage> {
                         if(tasksPerDay['Sunday']!.isNotEmpty)...[
                           IconButton(
                             onPressed: () {
-                              // Edit logic
+                              for (var task in tasksPerDay['Sunday']!) {
+                                _editTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.edit, color: Colors.blue),
                           ),
                           IconButton(
                             onPressed: () {
-                              // Delete logic
+                              for (var task in tasksPerDay['Monday']!) {
+                                _deleteTask(task);
+                                break;
+                              }
                             },
                             icon: Icon(Icons.delete, color: Colors.red),
                           ),
@@ -544,7 +680,7 @@ class _HomePageState extends State<HomePage> {
                         children: tasksPerDay['Sunday']!
                             .map((task) => Padding(
                           padding: EdgeInsets.only(bottom: 8),
-                          child: Text(task),
+                          child: Text(task['todoList'],),
                         )
                         ).toList(),
                       ),
@@ -555,7 +691,10 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           IconButton(
                               onPressed: () {
-
+                                for (var task in tasksPerDay['Sunday']!) {
+                                  _toggleDone(task);
+                                  break;
+                                }
                               },
                               icon: Icon(Icons.check, color: Colors.green)
                           ),
