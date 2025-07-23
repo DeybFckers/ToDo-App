@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:todo_list/HomePage.dart';
+import 'package:get/get.dart';
 
 class AddTaskPage extends StatefulWidget {
-  const AddTaskPage({super.key});
+  final String uid;
+  final String name;
+  final String email;
+  const AddTaskPage({super.key, required this.uid, required this.name, required this.email });
 
   @override
   State<AddTaskPage> createState() => _AddTaskPageState();
 }
 
 class _AddTaskPageState extends State<AddTaskPage> {
-
+  FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final List<String> daysofWeek = [ 'Monday', 'Tuesday', 'Wednesday',
                                     'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -95,13 +103,18 @@ class _AddTaskPageState extends State<AddTaskPage> {
                 ),
                 SizedBox(height: 5),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    //add data to firestore
                     if(taskController.text.isNotEmpty){
-                      Navigator.pop(context,{
-                        'day': selectedDay,
-                        'task': taskController.text,
-                        }
-                      );
+                      final uid = firebaseAuth.currentUser!.uid;
+
+                      await firebaseStore.collection('todos').add({
+                        'userId': uid,
+                        'todoList' : taskController.text,
+                        'Day' : selectedDay,
+                        'Done' : false,
+                      });
+                      Get.offAll(() => HomePage(uid: uid, name: widget.name, email: widget.email));
                     }
                   },
                   style: ElevatedButton.styleFrom(

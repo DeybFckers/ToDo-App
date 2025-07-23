@@ -5,6 +5,7 @@ import 'package:todo_list/LoginPage.dart';
 import 'package:todo_list/SettingsPage.dart';
 import 'package:todo_list/TermsAndCondition.dart';
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   final String uid;
@@ -18,6 +19,12 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
+  @override
+  void initState(){
+    super.initState();
+    fetchTasks();
+  }
+
   Map<String, List<String>> tasksPerDay = {
     'Monday': [],
     'Tuesday': [],
@@ -27,6 +34,44 @@ class _HomePageState extends State<HomePage> {
     'Saturday': [],
     'Sunday': [],
   };
+
+  Future<void>fetchTasks() async {
+    FirebaseFirestore firebaseStore = FirebaseFirestore.instance;
+
+    try {
+      //fetch data from firestore
+      QuerySnapshot snapshot = await firebaseStore
+          .collection('todos')
+          .where('userId', isEqualTo: widget.uid)
+          .get();
+
+      Map<String, List<String>> updatedTasks = {
+        'Monday': [],
+        'Tuesday': [],
+        'Wednesday': [],
+        'Thursday': [],
+        'Friday': [],
+        'Saturday': [],
+        'Sunday': [],
+      };
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+
+        String day = data['Day'];
+        String tasks = data['todoList'];
+
+        if(updatedTasks.containsKey(day)){
+          updatedTasks[day]!.add(tasks);
+        }
+      }
+
+      setState(() {
+        tasksPerDay = updatedTasks;
+      });
+    }catch (e){}
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,20 +133,8 @@ class _HomePageState extends State<HomePage> {
                       )
                     ),
                     GestureDetector(
-                      onTap: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => AddTaskPage()),
-                        );
-
-                        if (result != null && result is Map<String, String>){
-                          String day = result['day']!;
-                          String task = result['task']!;
-
-                          setState(() {
-                            tasksPerDay[day]!.add(task);
-                          });
-                        }
+                      onTap: () {
+                        Get.offAll(()=> AddTaskPage(uid: widget.uid, name: widget.name, email: widget.email));
                       },
                       child: Container(
                         padding: EdgeInsets.all(12),
@@ -127,11 +160,32 @@ class _HomePageState extends State<HomePage> {
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    Text('Monday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Monday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Monday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -150,12 +204,45 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Tuesday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    if(tasksPerDay['Monday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Tuesday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Tuesday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -174,12 +261,46 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Wednesday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    if(tasksPerDay['Tuesday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Wednesday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Wednesday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -198,12 +319,46 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Thursday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    if(tasksPerDay['Wednesday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Thursday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Thursday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -222,12 +377,45 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Friday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    if(tasksPerDay['Thursday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Friday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Friday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -246,12 +434,45 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
-                    SizedBox(height: 10),
-                    Text('Saturday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    if(tasksPerDay['Friday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Saturday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Saturday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -270,12 +491,46 @@ class _HomePageState extends State<HomePage> {
                         ).toList(),
                       ),
                     ),
+                    if(tasksPerDay['Saturday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
                     SizedBox(height: 10),
-                    Text('Sunday',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Sunday',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        if(tasksPerDay['Sunday']!.isNotEmpty)...[
+                          IconButton(
+                            onPressed: () {
+                              // Edit logic
+                            },
+                            icon: Icon(Icons.edit, color: Colors.blue),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              // Delete logic
+                            },
+                            icon: Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ]
+                      ],
                     ),
                     Container(
                       width: double.infinity,
@@ -293,7 +548,20 @@ class _HomePageState extends State<HomePage> {
                         )
                         ).toList(),
                       ),
-                    )
+                    ),
+                    if(tasksPerDay['Sunday']!.isNotEmpty)...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                              onPressed: () {
+
+                              },
+                              icon: Icon(Icons.check, color: Colors.green)
+                          ),
+                        ],
+                      )
+                    ],
                   ],
                 )
               ],
