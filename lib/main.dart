@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:todo_list/LoginPage.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 
 void main() async {
